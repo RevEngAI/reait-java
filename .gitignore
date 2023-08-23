@@ -36,3 +36,6 @@ Thumbs.db
 *.kotlin_metadata
 *.kotlin_builtins
 
+# Ignore development config files
+lib/src/test/resources/reai-dev-config.toml
+
