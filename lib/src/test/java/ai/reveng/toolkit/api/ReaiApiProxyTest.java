@@ -3,7 +3,6 @@ package ai.reveng.toolkit.api;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ai.reveng.toolkit.Config;
+import ai.reveng.toolkit.utils.ResourceUtils;
 
 class ReaiApiProxyTest {
-	private Path workingDir;
 	private ReaiApiProxy apiProxy;
 	private Map<String, String> headers;
 	private Map<String, String> params;
@@ -22,12 +21,9 @@ class ReaiApiProxyTest {
 
 	@BeforeEach
 	public void init() {
-		workingDir = Path.of("", "src/test/resources");
-		Path configFile = this.workingDir.resolve("reai-dev-config.toml");
+		
+		Path configFile = ResourceUtils.getResourcePath("reai-config.toml");
 		rc = new Config(configFile.toString());
-		assertEquals("f77d0f9e-c7f2-4652-bd53-256c1aa3bc78", rc.getApiKey());
-		assertEquals("https://api.reveng.ai", rc.getHost());
-		assertEquals("binnet-0.1", rc.getModel().toString());
 
 		apiProxy = new ReaiApiProxy(rc.getHost());
 
@@ -46,7 +42,7 @@ class ReaiApiProxyTest {
 
 	@Test
 	void testUpload() {
-		Path binPath = workingDir.resolve("false");
+		Path binPath = ResourceUtils.getResourcePath("false");
 		File bin = binPath.toFile();
 		assertTrue(bin.exists());
 

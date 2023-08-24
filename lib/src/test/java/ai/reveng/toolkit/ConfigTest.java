@@ -3,21 +3,15 @@ package ai.reveng.toolkit;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Path;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ai.reveng.toolkit.utils.ResourceUtils;
+
 class REAITConfigTest {
-	private Path workingDir;
-	
-	@BeforeEach
-	public void init() {
-		this.workingDir = Path.of("", "src/test/resources");
-	}
 
 	@Test
 	void testReadConfigFromTomlFile() {
-		Path configFile = this.workingDir.resolve("reai-test-config.toml");
+		Path configFile = ResourceUtils.getResourcePath("reai-test-config.toml");
 		Config rc = new Config(configFile.toString());
 		assertEquals("l1br3", rc.getApiKey());
 		assertEquals("https://api.reveng.ai", rc.getHost());

@@ -33,10 +33,20 @@ tasks.named<Test>("test") {
 }
 
 // Read the environment variable
-val apiKey: String = System.getenv("REAI_API_KEY") ?: "l1br3"
+val apiKey: String = System.getenv("REAI_API_KEY") ?: "NONE"
+
+println("API Key: $apiKey")
 
 tasks.withType<Copy>().named("processTestResources") {
-    filesMatching("**/reai-config.toml") {
-        expand(mapOf("API_KEY_PLACEHOLDER" to apiKey))
+    doLast {
+        println("Processing config.toml for API key replacement")
+        
+        val tomlFile = File(destinationDir, "reai-config.toml")
+        if (tomlFile.exists()) {
+            val content = tomlFile.readText().replace("API_KEY_PLACEHOLDER", apiKey)
+            tomlFile.writeText(content)
+        } else {
+            println("config.toml not found in $destinationDir")
+        }
     }
 }
