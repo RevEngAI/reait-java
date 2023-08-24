@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 
 /**
- * Implements behaviour for the IHttpRequester Interface
+ * Implements behaviour for the IApiRequester Interface
  */
 public class ApiRequesterImpl implements IApiRequester {
 
@@ -78,6 +78,11 @@ public class ApiRequesterImpl implements IApiRequester {
 		return new ApiResponse(response.statusCode(), response.body());
 	}
 
+	/**
+	 * Create a query string that can be appended to a URL
+	 * @param queryParams parameters to encode
+	 * @return string in the form ?{key}={value}(&)...
+	 */
 	private String buildQueryString(Map<String, String> queryParams) {
 		if (queryParams == null || queryParams.isEmpty()) {
 			return "";

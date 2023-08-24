@@ -10,13 +10,14 @@ public interface IApiRequester {
 	/**
 	 * 
 	 * @param endpoint    path of the endpoint
-	 * @param queryParams http parameters for the endpoint
-	 * @param bodyData    data for the request body
-	 * @param headers     http headers
-	 * @return ApiResponse with status code and body
-	 * @see ApiResponse
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * @param pathParams  any dynamic data required to generate the path
+	 * @param queryParams HTTP parameters for the endpoint
+	 * @param body        data for the request
+	 * @param bodyType    the type of the data, e.g. FILE, JSON
+	 * @param headers     HTTP Headers required for the endpoint request
+	 * @return ApiResponse object that contains the status code, and response body
+	 * @throws IOException when an IO Exception occurs
+	 * @throws InterruptedException when an InterruptedException occurs
 	 */
 	ApiResponse send(ApiEndpoint endpoint, Map<String, String> pathParams, Map<String, String> queryParams, Object body,
 			ApiBodyType bodyType, Map<String, String> headers) throws IOException, InterruptedException;

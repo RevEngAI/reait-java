@@ -4,6 +4,9 @@ import java.util.Map;
 
 /**
  * Defines the valid API Endpoints for RevEng.AI
+ * 
+ * When adding a new endpoint with a dynamic path, enclose the dynamic part with
+ * '{' and '}' for future replacement. For example /user/{userid}
  */
 public enum ApiEndpoint {
 	GET_MODELS("/models", "GET"), ECHO("/echo", "GET"), ANALYSE("/analyse", "POST"),
@@ -12,11 +15,24 @@ public enum ApiEndpoint {
 	private final String pathPattern;
 	private final String httpMethod;
 
+	/**
+	 * Constructor for the endpoint
+	 * 
+	 * @param pathPattern endpoint path with dynamic routes where applicable, e.g.
+	 *                    /user/{userid}
+	 * @param httpMethod  HTTP method for the endpoint - GET, POST, or DELETE
+	 */
 	ApiEndpoint(String pathPattern, String httpMethod) {
 		this.pathPattern = pathPattern;
 		this.httpMethod = httpMethod;
 	}
 
+	/**
+	 * Generates the path for the endpoint
+	 * 
+	 * @param pathParams dynamic data that forms part of the path
+	 * @return a full path that includes dynamic routes
+	 */
 	public String getPath(Map<String, String> pathParams) {
 		String resolvedPath = pathPattern;
 		for (Map.Entry<String, String> entry : pathParams.entrySet()) {

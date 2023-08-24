@@ -7,7 +7,8 @@ import java.util.Map;
 /**
  * Proxy that manages API actions.
  * 
- * Useful for intercepting requests for logging and caching
+ * Useful for intercepting requests for logging and caching. The goal with this
+ * class is to provide user-friendly methods that wrap the ApiRequests interface
  */
 public class ReaiApiProxy {
 	private ApiRequesterImpl apiRequester;
@@ -24,19 +25,12 @@ public class ReaiApiProxy {
 	}
 
 	/**
-	 * A simplified send method for requests ithout body types and headers
+	 * Main send method for the proxy
 	 * 
-	 * @param endpoint
-	 * @return
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * @see IApiRequester#send
 	 */
-	private ApiResponse send(ApiEndpoint endpoint) throws IOException, InterruptedException {
-		return send(endpoint, null, null, null, null, null);
-	}
-
-	private ApiResponse send(ApiEndpoint endpoint, Map<String, String> pathParams, Map<String, String> queryParams, Object body, ApiBodyType bodyType,
-			Map<String, String> headers) throws IOException, InterruptedException {
+	private ApiResponse send(ApiEndpoint endpoint, Map<String, String> pathParams, Map<String, String> queryParams,
+			Object body, ApiBodyType bodyType, Map<String, String> headers) throws IOException, InterruptedException {
 		String dynamicPath = (pathParams != null) ? endpoint.getPath(pathParams) : endpoint.getPath(new HashMap<>());
 		String fullUrl = baseUrl + dynamicPath;
 		System.out.println("Sending " + endpoint.getHttpMethod() + " request via proxy to: " + fullUrl);
@@ -46,11 +40,16 @@ public class ReaiApiProxy {
 
 		return response;
 	}
-	
+
+	/**
+	 * Send an echo request to the API to test for a connection
+	 * 
+	 * @param headers request headers
+	 * @return ApiResponse
+	 */
 	public ApiResponse echo(Map<String, String> headers) {
 		try {
-			return send(ApiEndpoint.ECHO, null,
-					null, // no params
+			return send(ApiEndpoint.ECHO, null, null, // no params
 					null, // no body for GET
 					null, // no body type
 					headers);
@@ -58,7 +57,15 @@ public class ReaiApiProxy {
 			return new ApiResponse(-1, e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Upload a binary to the server
+	 * 
+	 * @param params  parameters with details about the binary
+	 * @param binPath path to binary you wish to upload
+	 * @param headers request headers
+	 * @return ApiResponse
+	 */
 	public ApiResponse upload(Map<String, String> params, Object binPath, Map<String, String> headers) {
 		try {
 			return send(ApiEndpoint.ANALYSE, null, params, binPath, ApiBodyType.FILE, headers);
@@ -66,7 +73,14 @@ public class ReaiApiProxy {
 			return new ApiResponse(-1, e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Check the status of an analysis
+	 * 
+	 * @param binHash SHA 256 hash of the binary you uploaded
+	 * @param headers request headers
+	 * @return ApiResponse
+	 */
 	public ApiResponse status(String binHash, Map<String, String> headers) {
 		Map<String, String> pathParams = new HashMap<>();
 		pathParams.put("sha_256_hash", binHash);
@@ -76,7 +90,14 @@ public class ReaiApiProxy {
 			return new ApiResponse(-1, e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Delete an analysis from the server
+	 * 
+	 * @param binHash sha256 hash of the binary you wish to delete
+	 * @param headers request headers
+	 * @return ApiResponse
+	 */
 	public ApiResponse delete(String binHash, Map<String, String> headers) {
 		Map<String, String> pathParams = new HashMap<>();
 		pathParams.put("sha_256_hash", binHash);

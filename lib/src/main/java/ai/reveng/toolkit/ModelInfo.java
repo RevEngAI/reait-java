@@ -29,7 +29,7 @@ public class ModelInfo {
 	/**
 	 * Create a new model from a string
 	 * 
-	 * @param modelString model identifier in the form <name>-<version>
+	 * @param modelString model identifier in the form {name}-{version}
 	 */
 	public ModelInfo(String modelString) {
 		// TODO check string is in valid format

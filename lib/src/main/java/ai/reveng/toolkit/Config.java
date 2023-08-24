@@ -17,14 +17,19 @@ public class Config {
 	 * Constructor for when we have the API Key and a host url, but don't know what
 	 * models are available
 	 * 
-	 * @param apikey
-	 * @param host
+	 * @param apikey RevEng.AI API key
+	 * @param host base URL for the host, e.g. https://api.reveng.ai
 	 */
 	public Config(String apikey, String host) {
 		this.apiKey = apikey;
 		this.host = host;
 	}
 
+	/**
+	 * Create a config object from the given config file
+	 * 
+	 * @param tomlFilePath path to toml file on system
+	 */
 	public Config(String tomlFilePath) {
 		File tomlFile = new File(tomlFilePath);
 		Toml toml = new Toml().read(tomlFile);

@@ -9,22 +9,23 @@ import java.nio.file.Paths;
 public class ResourceUtils {
 	/**
 	 * Returns path to the given filename
+	 * 
 	 * @param filename name file inside the resource directory
 	 * @return Path to the provided file
 	 */
 	public static Path getResourcePath(String filename) {
 		URL resourceUrl = ResourceUtils.class.getClassLoader().getResource(filename);
 		if (resourceUrl == null) {
-            throw new RuntimeException("Resource not found: " + filename);
-        }
-		
+			throw new RuntimeException("Resource not found: " + filename);
+		}
+
 		URI resourceUri;
 		try {
 			resourceUri = resourceUrl.toURI();
 		} catch (URISyntaxException e) {
-			 throw new RuntimeException("Invalid URI");
+			throw new RuntimeException("Invalid URI");
 		}
-		
+
 		return Paths.get(resourceUri);
 	}
 }

@@ -50,3 +50,9 @@ tasks.withType<Copy>().named("processTestResources") {
         }
     }
 }
+
+tasks.javadoc {
+    title = "RevEng.AI Toolkit JavaDoc"
+    source = sourceSets.main.get().allJava
+    destinationDir = buildDir.resolve("docs/javadoc")
+}

@@ -4,6 +4,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+/**
+ * Models a response from the API
+ * 
+ * Attempts to parse the response body as JSON, but will just null the result if invalid
+ */
 public class ApiResponse {
 	private int statusCode;
 	private String responseBody;
