@@ -77,11 +77,21 @@ class ReaiApiProxyTest {
 			
 			String binHash = res.getJsonObject().getString("sha_256_hash");
 			pathParams.put("sha_256_hash", binHash);
+			
 			// wait until status returns complete
-			res = apiRequester.send(ApiEndpoint.STATUS, pathParams, params, null, null, headers);
-			assertEquals(200, res.getStatusCode());
+			String status = "";
+			do {
+				status = apiRequester.send(ApiEndpoint.STATUS, pathParams, null, null, null, headers).getJsonObject().getString("status");
+				try {
+	                Thread.sleep(15000); // Sleep for 15000 milliseconds (15 seconds)
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	            }
+			} while (!status.equalsIgnoreCase("complete"));
 			
 			// delete the file
+			res = apiRequester.send(ApiEndpoint.DELETE, pathParams, null, null, null, headers);
+			assertEquals(200, res.getStatusCode());
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

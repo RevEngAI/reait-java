@@ -63,6 +63,9 @@ public class ApiRequesterImpl implements IApiRequester {
 				}
 			}
 			break;
+		case "DELETE":
+			requestBuilder.DELETE();
+			break;
 		// ... other methods ...
 		}
 
