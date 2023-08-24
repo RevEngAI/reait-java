@@ -1,6 +1,8 @@
 package ai.reveng.toolkit.api;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,15 +15,22 @@ import java.util.Map;
 public class ReaiApiProxy {
 	private ApiRequesterImpl apiRequester;
 	private String baseUrl;
+	private String modelName;
+	private Map<String, String> headers;
 
 	/**
 	 * Creates a new proxy
 	 * 
 	 * @param baseUrl url of API host, e.g. https://reveng.ai
 	 */
-	public ReaiApiProxy(String baseUrl) {
-		this.apiRequester = new ApiRequesterImpl(baseUrl);
+	public ReaiApiProxy(String baseUrl, String apiKey, String modelName) {
+		apiRequester = new ApiRequesterImpl(baseUrl);
 		this.baseUrl = baseUrl;
+		this.modelName = modelName;
+		
+		headers = new HashMap<>();
+		headers.put("Authorization", apiKey);
+		headers.put("User-Agent", "REAIT Java Proxy");
 	}
 
 	/**
@@ -34,6 +43,8 @@ public class ReaiApiProxy {
 		String dynamicPath = (pathParams != null) ? endpoint.getPath(pathParams) : endpoint.getPath(new HashMap<>());
 		String fullUrl = baseUrl + dynamicPath;
 		System.out.println("Sending " + endpoint.getHttpMethod() + " request via proxy to: " + fullUrl);
+		
+		System.out.println(queryParams);
 
 		ApiResponse response = apiRequester.send(endpoint, pathParams, queryParams, body, bodyType, headers);
 		System.out.println("Request completed.\n" + response.getResponseBody());
@@ -47,7 +58,7 @@ public class ReaiApiProxy {
 	 * @param headers request headers
 	 * @return ApiResponse
 	 */
-	public ApiResponse echo(Map<String, String> headers) {
+	public ApiResponse echo() {
 		try {
 			return send(ApiEndpoint.ECHO, null, null, // no params
 					null, // no body for GET
@@ -58,30 +69,52 @@ public class ReaiApiProxy {
 		}
 	}
 
+
 	/**
-	 * Upload a binary to the server
-	 * 
-	 * @param params  parameters with details about the binary
-	 * @param binPath path to binary you wish to upload
-	 * @param headers request headers
-	 * @return ApiResponse
+	 * Call the analysis endpoint
+	 * @param binPath
+	 * @param modelName
+	 * @param baseAddr
+	 * @param opts
+	 * @return
 	 */
-	public ApiResponse upload(Map<String, String> params, Object binPath, Map<String, String> headers) {
+	public ApiResponse analyse(Path binPath, String modelName, String baseAddr, AnalysisOptions opts) {
+		File bin = binPath.toFile();
+		
+		if (!bin.exists())
+			throw new RuntimeException("Binary to upload does not exist");
+		
+		Map<String, String> params = new HashMap<>();
+		params.put("file_name", bin.getName());
+		params.put("base_vaddr", baseAddr);
+		params.put("model", modelName);
+		params.putAll(opts.toMap());
+		
 		try {
 			return send(ApiEndpoint.ANALYSE, null, params, binPath, ApiBodyType.FILE, headers);
 		} catch (IOException | InterruptedException e) {
 			return new ApiResponse(-1, e.getMessage());
 		}
 	}
+	
+	/**
+	 * Analyse call when we want to use the provided model name
+	 * @param binPath
+	 * @param baseAddr
+	 * @param opts
+	 * @return
+	 */
+	public ApiResponse analyse(Path binPath, String baseAddr, AnalysisOptions opts) {
+		return analyse(binPath, modelName, baseAddr, opts);
+	}
 
 	/**
 	 * Check the status of an analysis
 	 * 
 	 * @param binHash SHA 256 hash of the binary you uploaded
-	 * @param headers request headers
 	 * @return ApiResponse
 	 */
-	public ApiResponse status(String binHash, Map<String, String> headers) {
+	public ApiResponse status(String binHash) {
 		Map<String, String> pathParams = new HashMap<>();
 		pathParams.put("sha_256_hash", binHash);
 		try {
@@ -98,7 +131,7 @@ public class ReaiApiProxy {
 	 * @param headers request headers
 	 * @return ApiResponse
 	 */
-	public ApiResponse delete(String binHash, Map<String, String> headers) {
+	public ApiResponse delete(String binHash) {
 		Map<String, String> pathParams = new HashMap<>();
 		pathParams.put("sha_256_hash", binHash);
 		try {
@@ -107,8 +140,15 @@ public class ReaiApiProxy {
 			return new ApiResponse(-1, e.getMessage());
 		}
 	}
-	
-	public ApiResponse embeddings(String binHash, Map<String, String> headers) {
+
+	/**
+	 * Return the embeddings for the given binary
+	 * 
+	 * @param binHash sha256 hash of binary
+	 * @param headers request headers
+	 * @return
+	 */
+	public ApiResponse embeddings(String binHash) {
 		Map<String, String> pathParams = new HashMap<>();
 		pathParams.put("sha_256_hash", binHash);
 		try {
@@ -117,4 +157,9 @@ public class ReaiApiProxy {
 			return new ApiResponse(-1, e.getMessage());
 		}
 	}
+	
+	public ApiResponse nearestSymbols(double[] embeddings, String modelName, int nns, String[] collections) {
+		return null;
+	}
+
 }

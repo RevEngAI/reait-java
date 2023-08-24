@@ -2,11 +2,7 @@ package ai.reveng.toolkit.api;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -23,8 +19,6 @@ import ai.reveng.toolkit.utils.ResourceUtils;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReaiApiProxyTest {
 	private ReaiApiProxy apiProxy;
-	private Map<String, String> headers;
-	private Map<String, String> params;
 	private Config rc;
 	private String binHash;
 	private BinaryEmbedding binEmbedding;
@@ -35,35 +29,22 @@ class ReaiApiProxyTest {
 		Path configFile = ResourceUtils.getResourcePath("reai-config.toml");
 		rc = new Config(configFile.toString());
 
-		apiProxy = new ReaiApiProxy(rc.getHost());
-
-		headers = new HashMap<>();
-		headers.put("Authorization", rc.getApiKey());
-		headers.put("User-Agent", "REAIT Java Tests");
-
-		params = new HashMap<>();
+		apiProxy = new ReaiApiProxy(rc.getHost(), rc.getApiKey(), rc.getModel().toString());
 	}
 
 	@Test
 	void testSendEcho() {
-		ApiResponse res = apiProxy.echo(headers);
+		ApiResponse res = apiProxy.echo();
 		assertEquals(200, res.getStatusCode());
 	}
 
 	@Test
 	@Order(1)
-	void testUpload() {
+	void testAnalyse() {
 		Path binPath = ResourceUtils.getResourcePath("false");
-		File bin = binPath.toFile();
-		assertTrue(bin.exists());
-
-		params.put("model", rc.getModel().toString());
-		params.put("file_options", "ELF");
-		params.put("file_name", bin.getName());
-		params.put("base_vaddr", "00400000");
 
 		// Upload the file
-		ApiResponse res = apiProxy.upload(params, binPath, headers);
+		ApiResponse res = apiProxy.analyse(binPath, "00400000", new AnalysisOptions.Builder().build());
 		assertEquals(200, res.getStatusCode());
 
 		binHash = res.getJsonObject().getString("sha_256_hash");
@@ -71,7 +52,7 @@ class ReaiApiProxyTest {
 		// wait until status returns complete
 		String status = "";
 		do {
-			status = apiProxy.status(binHash, headers).getJsonObject().getString("status");
+			status = apiProxy.status(binHash).getJsonObject().getString("status");
 			try {
 				// during testing this takes ~ 1 1/2 minutes, so this is a good compromise
 				Thread.sleep(30000); // Sleep for 30000 milliseconds (30 seconds)
@@ -85,7 +66,7 @@ class ReaiApiProxyTest {
 	@Order(2)
 	void testEmbeddings() {
 		// Fetch embeddings for the result
-		ApiResponse res = apiProxy.embeddings(binHash, headers);
+		ApiResponse res = apiProxy.embeddings(binHash);
 		assertEquals(200, res.getStatusCode());
 		
 		binEmbedding = new BinaryEmbedding(res.getJsonArray());
@@ -95,9 +76,15 @@ class ReaiApiProxyTest {
 	
 	@Test
 	@Order(3)
+	void testNearestSymbols() {
+		return;
+	}
+	
+	@Test
+	@Order(4)
 	void testDelete() {
 		// delete the file
-		ApiResponse res = apiProxy.delete(binHash, headers);
+		ApiResponse res = apiProxy.delete(binHash);
 		assertEquals(200, res.getStatusCode());
 	}
 }
