@@ -9,16 +9,15 @@ import java.util.Map;
 public interface IApiRequester {
 	/**
 	 * 
-	 * @param endpoint path of the endpoint
+	 * @param endpoint    path of the endpoint
 	 * @param queryParams http parameters for the endpoint
-	 * @param bodyData data for the request body
-	 * @param headers http headers
+	 * @param bodyData    data for the request body
+	 * @param headers     http headers
 	 * @return ApiResponse with status code and body
 	 * @see ApiResponse
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-    ApiResponse send(ApiEndpoint endpoint, Map<String, String> queryParams, Map<String, String> bodyData, Map<String, String> headers) throws IOException, InterruptedException;
+	ApiResponse send(ApiEndpoint endpoint, Map<String, String> pathParams, Map<String, String> queryParams, Object body,
+			ApiBodyType bodyType, Map<String, String> headers) throws IOException, InterruptedException;
 }
-
-

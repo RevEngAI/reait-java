@@ -1,6 +1,7 @@
 package ai.reveng.toolkit.api;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,14 +23,27 @@ public class ReaiApiProxy implements IApiRequester {
 		this.baseUrl = baseUrl;
 	}
 
+	/**
+	 * A simplified send method for requests ithout body types and headers
+	 * 
+	 * @param endpoint
+	 * @return
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public ApiResponse send(ApiEndpoint endpoint) throws IOException, InterruptedException {
+		return send(endpoint, null, null, null, null, null);
+	}
+
 	@Override
-	public ApiResponse send(ApiEndpoint endpoint, Map<String, String> queryParams, Map<String, String> bodyData,
+	public ApiResponse send(ApiEndpoint endpoint, Map<String, String> pathParams, Map<String, String> queryParams, Object body, ApiBodyType bodyType,
 			Map<String, String> headers) throws IOException, InterruptedException {
-		String fullUrl = baseUrl + endpoint.getPath();
+		String dynamicPath = (pathParams != null) ? endpoint.getPath(pathParams) : endpoint.getPath(new HashMap<>());
+		String fullUrl = baseUrl + dynamicPath;
 		System.out.println("Sending " + endpoint.getHttpMethod() + " request via proxy to: " + fullUrl);
 
-		ApiResponse response = apiRequester.send(endpoint, queryParams, bodyData, headers);
-		System.out.println("Request completed.\n"+response.getResponseBody());
+		ApiResponse response = apiRequester.send(endpoint, pathParams, queryParams, body, bodyType, headers);
+		System.out.println("Request completed.\n" + response.getResponseBody());
 
 		return response;
 	}
