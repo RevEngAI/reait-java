@@ -8,20 +8,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import ai.reveng.toolkit.Config;
 import ai.reveng.toolkit.utils.ResourceUtils;
 
+@TestMethodOrder(OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReaiApiProxyTest {
 	private ReaiApiProxy apiProxy;
 	private Map<String, String> headers;
 	private Map<String, String> params;
 	private Config rc;
+	private String binHash;
 
 	@BeforeEach
 	public void init() {
-		
+
 		Path configFile = ResourceUtils.getResourcePath("reai-config.toml");
 		rc = new Config(configFile.toString());
 
@@ -41,6 +48,7 @@ class ReaiApiProxyTest {
 	}
 
 	@Test
+	@Order(1)
 	void testUpload() {
 		Path binPath = ResourceUtils.getResourcePath("false");
 		File bin = binPath.toFile();
@@ -50,27 +58,31 @@ class ReaiApiProxyTest {
 		params.put("file_options", "ELF");
 		params.put("file_name", bin.getName());
 		params.put("base_vaddr", "00400000");
-		
+
 		// Upload the file
 		ApiResponse res = apiProxy.upload(params, binPath, headers);
 		assertEquals(200, res.getStatusCode());
-		
-		String binHash = res.getJsonObject().getString("sha_256_hash");
-			
+
+		binHash = res.getJsonObject().getString("sha_256_hash");
+
 		// wait until status returns complete
 		String status = "";
 		do {
 			status = apiProxy.status(binHash, headers).getJsonObject().getString("status");
 			try {
 				// during testing this takes ~ 1 1/2 minutes, so this is a good compromise
-                Thread.sleep(30000); // Sleep for 30000 milliseconds (30 seconds)
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+				Thread.sleep(30000); // Sleep for 30000 milliseconds (30 seconds)
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		} while (!status.equalsIgnoreCase("complete"));
-			
+	}
+	
+	@Test
+	@Order(2)
+	void testDelete() {
 		// delete the file
-		res = apiProxy.delete(binHash, headers);
+		ApiResponse res = apiProxy.delete(binHash, headers);
 		assertEquals(200, res.getStatusCode());
 	}
 }
