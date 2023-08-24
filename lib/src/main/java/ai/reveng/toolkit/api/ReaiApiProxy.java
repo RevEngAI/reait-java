@@ -107,4 +107,14 @@ public class ReaiApiProxy {
 			return new ApiResponse(-1, e.getMessage());
 		}
 	}
+	
+	public ApiResponse embeddings(String binHash, Map<String, String> headers) {
+		Map<String, String> pathParams = new HashMap<>();
+		pathParams.put("sha_256_hash", binHash);
+		try {
+			return send(ApiEndpoint.EMBEDDINGS, pathParams, null, null, null, headers);
+		} catch (IOException | InterruptedException e) {
+			return new ApiResponse(-1, e.getMessage());
+		}
+	}
 }

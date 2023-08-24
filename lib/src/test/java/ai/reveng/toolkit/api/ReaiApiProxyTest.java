@@ -15,6 +15,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import ai.reveng.toolkit.Config;
+import ai.reveng.toolkit.types.BinaryEmbedding;
+import ai.reveng.toolkit.types.FunctionEmbedding;
 import ai.reveng.toolkit.utils.ResourceUtils;
 
 @TestMethodOrder(OrderAnnotation.class)
@@ -25,6 +27,7 @@ class ReaiApiProxyTest {
 	private Map<String, String> params;
 	private Config rc;
 	private String binHash;
+	private BinaryEmbedding binEmbedding;
 
 	@BeforeEach
 	public void init() {
@@ -80,6 +83,18 @@ class ReaiApiProxyTest {
 	
 	@Test
 	@Order(2)
+	void testEmbeddings() {
+		// Fetch embeddings for the result
+		ApiResponse res = apiProxy.embeddings(binHash, headers);
+		assertEquals(200, res.getStatusCode());
+		
+		binEmbedding = new BinaryEmbedding(res.getJsonArray());
+		FunctionEmbedding testEmbedding = binEmbedding.getFunctionEmbedding("quotearg_alloc");
+		assertEquals(9, testEmbedding.getSize());
+	}
+	
+	@Test
+	@Order(3)
 	void testDelete() {
 		// delete the file
 		ApiResponse res = apiProxy.delete(binHash, headers);
