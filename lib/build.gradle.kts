@@ -31,3 +31,12 @@ tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+
+// Read the environment variable
+val apiKey: String = System.getenv("REAI_API_KEY") ?: "l1br3"
+
+tasks.withType<Copy>().named("processTestResources") {
+    filesMatching("**/reai-config.toml") {
+        expand(mapOf("API_KEY_PLACEHOLDER" to apiKey))
+    }
+}

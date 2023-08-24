@@ -1,0 +1,3 @@
+apikey = "API_KEY"
+host = "https://api.reveng.ai"
+model = "binnet-0.1"

@@ -8,7 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      SECRET_API_KEY: ${{ secrets.API_KEY }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -25,4 +26,9 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Build and test with Gradle
+      run: ./gradlew clean test --info
