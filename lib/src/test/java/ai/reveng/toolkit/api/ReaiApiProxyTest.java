@@ -15,11 +15,9 @@ import ai.reveng.toolkit.Config;
 
 class ReaiApiProxyTest {
 	private Path workingDir;
-	private IApiRequester apiRequester;
+	private ReaiApiProxy apiProxy;
 	private Map<String, String> headers;
 	private Map<String, String> params;
-	private Map<String, String> body;
-	private Map<String, String> pathParams;
 	private Config rc;
 
 	@BeforeEach
@@ -31,32 +29,19 @@ class ReaiApiProxyTest {
 		assertEquals("https://api.reveng.ai", rc.getHost());
 		assertEquals("binnet-0.1", rc.getModel().toString());
 
-		apiRequester = new ReaiApiProxy(rc.getHost());
+		apiProxy = new ReaiApiProxy(rc.getHost());
 
 		headers = new HashMap<>();
 		headers.put("Authorization", rc.getApiKey());
 		headers.put("User-Agent", "REAIT Java Tests");
 
 		params = new HashMap<>();
-		
-		pathParams = new HashMap<>();
 	}
 
 	@Test
 	void testSendEcho() {
-		try {
-			ApiResponse res = apiRequester.send(ApiEndpoint.ECHO, null, null, // no params
-					null, // no body for GET
-					null, // no body type
-					headers);
-			assertEquals(200, res.getStatusCode());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ApiResponse res = apiProxy.echo(headers);
+		assertEquals(200, res.getStatusCode());
 	}
 
 	@Test
@@ -69,37 +54,27 @@ class ReaiApiProxyTest {
 		params.put("file_options", "ELF");
 		params.put("file_name", bin.getName());
 		params.put("base_vaddr", "00400000");
-
-		try {
-			// Upload the file
-			ApiResponse res = apiRequester.send(ApiEndpoint.ANALYSE, null, params, binPath, ApiBodyType.FILE, headers);
-			assertEquals(200, res.getStatusCode());
+		
+		// Upload the file
+		ApiResponse res = apiProxy.upload(params, binPath, headers);
+		assertEquals(200, res.getStatusCode());
+		
+		String binHash = res.getJsonObject().getString("sha_256_hash");
 			
-			String binHash = res.getJsonObject().getString("sha_256_hash");
-			pathParams.put("sha_256_hash", binHash);
+		// wait until status returns complete
+		String status = "";
+		do {
+			status = apiProxy.status(binHash, headers).getJsonObject().getString("status");
+			try {
+				// during testing this takes ~ 1 1/2 minutes, so this is a good compromise
+                Thread.sleep(30000); // Sleep for 30000 milliseconds (30 seconds)
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+		} while (!status.equalsIgnoreCase("complete"));
 			
-			// wait until status returns complete
-			String status = "";
-			do {
-				status = apiRequester.send(ApiEndpoint.STATUS, pathParams, null, null, null, headers).getJsonObject().getString("status");
-				try {
-	                Thread.sleep(15000); // Sleep for 15000 milliseconds (15 seconds)
-	            } catch (InterruptedException e) {
-	                e.printStackTrace();
-	            }
-			} while (!status.equalsIgnoreCase("complete"));
-			
-			// delete the file
-			res = apiRequester.send(ApiEndpoint.DELETE, pathParams, null, null, null, headers);
-			assertEquals(200, res.getStatusCode());
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// delete the file
+		res = apiProxy.delete(binHash, headers);
+		assertEquals(200, res.getStatusCode());
 	}
-
 }
