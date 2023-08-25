@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 /**
  * Proxy that manages API actions.
@@ -274,8 +276,20 @@ public class ReaiApiProxy {
 		return cves(binHash, modelName);
 	}
 
-	public ApiResponse nearestSymbols(double[] embeddings, String modelName, int nns, String[] collections) {
-		return null;
+	public ApiResponse nearestSymbols(List<Double> embedding, String modelName, int nns, String[] collections) {
+		Map<String, String> params = new HashMap<>();
+		params.put("model_name", modelName);
+		params.put("nns", Integer.toString(nns));
+		
+		try {
+			return send(ApiEndpoint.ANN_SYMBOL, null, params, embedding, ApiBodyType.EMBEDDING, headers);
+		} catch (IOException | InterruptedException e) {
+			return new ApiResponse(-1, e.getMessage());
+		}
+	}
+	
+	public ApiResponse nearestSymbols(List<Double> embedding, int nns, String[] collections) {
+		return nearestSymbols(embedding, modelName, nns, collections);
 	}
 
 }

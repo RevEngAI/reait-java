@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,10 @@ public class ApiRequesterImpl implements IApiRequester {
 				case FILE:
 					requestBuilder.POST(HttpRequest.BodyPublishers.ofFile((Path) body)).header("Content-Type",
 							"application/octet-stream");
+					break;
+				case EMBEDDING:
+					String rawData = ((List<Double>) body).stream().map(Object::toString).collect(Collectors.joining(","));
+					requestBuilder.POST(HttpRequest.BodyPublishers.ofString("["+rawData+"]"));
 					break;
 				}
 			}
