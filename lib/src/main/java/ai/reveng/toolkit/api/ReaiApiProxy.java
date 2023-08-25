@@ -78,7 +78,7 @@ public class ReaiApiProxy {
 	 * @param opts
 	 * @return
 	 */
-	public ApiResponse analyse(Path binPath, String modelName, String baseAddr, AnalysisOptions opts) {
+	public ApiResponse analyse(Path binPath, String modelName, int baseAddr, AnalysisOptions opts) {
 		File bin = binPath.toFile();
 
 		if (!bin.exists())
@@ -86,7 +86,7 @@ public class ReaiApiProxy {
 
 		Map<String, String> params = new HashMap<>();
 		params.put("file_name", bin.getName());
-		params.put("base_vaddr", baseAddr);
+		params.put("base_vaddr", Integer.toHexString(baseAddr));
 		params.put("model", modelName);
 		params.putAll(opts.toMap());
 
@@ -105,7 +105,7 @@ public class ReaiApiProxy {
 	 * @param opts
 	 * @return
 	 */
-	public ApiResponse analyse(Path binPath, String baseAddr, AnalysisOptions opts) {
+	public ApiResponse analyse(Path binPath, int baseAddr, AnalysisOptions opts) {
 		return analyse(binPath, modelName, baseAddr, opts);
 	}
 
@@ -203,6 +203,57 @@ public class ReaiApiProxy {
 	
 	public ApiResponse signature(String binHash) {
 		return signature(binHash, modelName);
+	}
+	
+	/**
+	 * TODO
+	 * @param binHash
+	 * @param startVAddr
+	 * @param endVAddr
+	 * @param baseVAddr
+	 * @param modelName
+	 * @return
+	 */
+	private ApiResponse embedding(String binHash, int startVAddr, Integer endVAddr, Integer baseVAddr, String modelName) {
+		Map<String, String> pathParams = new HashMap<>();
+		pathParams.put("sha_256_hash", binHash);
+		pathParams.put("start_vaddr", Integer.toHexString(startVAddr));
+		
+		Map<String, String> params = new HashMap<>();
+		params.put("model_name", modelName);
+		
+		if (endVAddr != null)
+			params.put("end_vaddr", Integer.toHexString(endVAddr));
+		if (baseVAddr != null)
+			params.put("base_vaddr", Integer.toHexString(baseVAddr));
+		
+		try {
+			return send(ApiEndpoint.EMBEDDING, pathParams, params, null, null, headers);
+		} catch (IOException | InterruptedException e) {
+			return new ApiResponse(-1, e.getMessage());
+		}
+	}
+	
+	private ApiResponse embedding(String binHash, int startVAddr, Integer endVAddr, Integer baseVAddr) {
+		return embedding(binHash, startVAddr, endVAddr, baseVAddr, modelName);
+	}
+	
+	public ApiResponse logs(String binHash, String modelName) {
+		Map<String, String> pathParams = new HashMap<>();
+		pathParams.put("sha_256_hash", binHash);
+		
+		Map<String, String> params = new HashMap<>();
+		params.put("model_name", modelName);
+		
+		try {
+			return send(ApiEndpoint.LOGS, pathParams, params, null, null, headers);
+		} catch (IOException | InterruptedException e) {
+			return new ApiResponse(-1, e.getMessage());
+		}
+	}
+	
+	public ApiResponse logs(String binHash) {
+		return logs(binHash, modelName);
 	}
 
 	public ApiResponse nearestSymbols(double[] embeddings, String modelName, int nns, String[] collections) {

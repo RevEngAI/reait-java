@@ -44,7 +44,7 @@ class ReaiApiProxyTest {
 		Path binPath = ResourceUtils.getResourcePath("false");
 
 		// Upload the file
-		ApiResponse res = apiProxy.analyse(binPath, "00400000", new AnalysisOptions.Builder().build());
+		ApiResponse res = apiProxy.analyse(binPath, 00400000, new AnalysisOptions.Builder().build());
 		assertEquals(200, res.getStatusCode());
 
 		binHash = res.getJsonObject().getString("sha_256_hash");
@@ -90,8 +90,16 @@ class ReaiApiProxyTest {
 	
 	@Test
 	void testSignature() {
+		// fdupes on test account
 		String hash = "3caa869ed79bf8c8c7a54b87f6e3e439ed3355b6076befa939c3189b5fb19d14";
 		ApiResponse res = apiProxy.signature(hash);
+		assertEquals(200, res.getStatusCode());
+	}
+	
+	@Test
+	void testLogs() {
+		String hash = "3caa869ed79bf8c8c7a54b87f6e3e439ed3355b6076befa939c3189b5fb19d14";
+		ApiResponse res = apiProxy.logs(hash);
 		assertEquals(200, res.getStatusCode());
 	}
 }
