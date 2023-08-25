@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 
+import ai.reveng.toolkit.Utils;
+
 /**
  * Implements behaviour for the IApiRequester Interface
  */
@@ -64,6 +66,8 @@ public class ApiRequesterImpl implements IApiRequester {
 				case EMBEDDING:
 					String rawData = ((List<Double>) body).stream().map(Object::toString).collect(Collectors.joining(","));
 					requestBuilder.POST(HttpRequest.BodyPublishers.ofString("["+rawData+"]"));
+					break;
+				default:
 					break;
 				}
 			}

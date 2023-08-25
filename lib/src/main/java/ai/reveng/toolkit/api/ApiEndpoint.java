@@ -13,7 +13,8 @@ public enum ApiEndpoint {
 	STATUS("/analyse/status/{sha_256_hash}", "GET"), DELETE("/analyse/{sha_256_hash}", "DELETE"),
 	EMBEDDINGS("/embeddings/{sha_256_hash}", "GET"), SIGNATURE("/signature/{sha_256_hash}", "GET"),
 	EMBEDDING("/embedding/{sha_256_hash}/{start_vaddr}", "GET"), LOGS("/logs/{sha_256_hash}", "GET"),
-	CVES("/cves/{sha_256_hash}", "GET"), ANN_SYMBOL("/ann/symbol","POST");
+	CVES("/cves/{sha_256_hash}", "GET"), ANN_SYMBOL("/ann/symbol", "POST"), ANN_BINARY("/ann/binary", "POST"),
+	SBOM("/sboms/{sha_256_hash}", "GET");
 
 	private final String pathPattern;
 	private final String httpMethod;

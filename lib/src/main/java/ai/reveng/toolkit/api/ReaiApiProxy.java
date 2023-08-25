@@ -90,6 +90,7 @@ public class ReaiApiProxy {
 		params.put("file_name", bin.getName());
 		params.put("base_vaddr", Integer.toHexString(baseAddr));
 		params.put("model", modelName);
+		params.put("priority", Integer.toString(10));
 		params.putAll(opts.toMap());
 
 		try {
@@ -290,6 +291,40 @@ public class ReaiApiProxy {
 	
 	public ApiResponse nearestSymbols(List<Double> embedding, int nns, String[] collections) {
 		return nearestSymbols(embedding, modelName, nns, collections);
+	}
+	
+	public ApiResponse nearestBinaries(List<Double> embedding, int nns, String[] collections) {
+		return nearestBinaries(embedding, modelName, nns, collections);
+	}
+	
+	public ApiResponse nearestBinaries(List<Double> embedding, String modelName, int nns, String[] collections) {
+		Map<String, String> params = new HashMap<>();
+		params.put("model_name", modelName);
+		params.put("nns", Integer.toString(nns));
+		
+		try {
+			return send(ApiEndpoint.ANN_BINARY, null, params, embedding, ApiBodyType.EMBEDDING, headers);
+		} catch (IOException | InterruptedException e) {
+			return new ApiResponse(-1, e.getMessage());
+		}
+	}
+	
+	public ApiResponse sbom(String binHash, String modelName) {
+		Map<String, String> pathParams = new HashMap<>();
+		pathParams.put("sha_256_hash", binHash);
+		
+		Map<String, String> params = new HashMap<>();
+		params.put("model_name", modelName);
+		
+		try {
+			return send(ApiEndpoint.SBOM, pathParams, params, null, null, headers);
+		} catch (IOException | InterruptedException e) {
+			return new ApiResponse(-1, e.getMessage());
+		}
+	}
+	
+	public ApiResponse sbom(String binHash) {
+		return cves(binHash, modelName);
 	}
 
 }
