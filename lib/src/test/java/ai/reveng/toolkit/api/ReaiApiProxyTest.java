@@ -102,4 +102,11 @@ class ReaiApiProxyTest {
 		ApiResponse res = apiProxy.logs(hash);
 		assertEquals(200, res.getStatusCode());
 	}
+	
+	@Test
+	void testCVEs() {
+		String hash = "3caa869ed79bf8c8c7a54b87f6e3e439ed3355b6076befa939c3189b5fb19d14";
+		ApiResponse res = apiProxy.cves(hash);
+		assertEquals(200, res.getStatusCode());
+	}
 }

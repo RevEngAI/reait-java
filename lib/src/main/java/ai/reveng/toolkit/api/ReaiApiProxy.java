@@ -255,6 +255,24 @@ public class ReaiApiProxy {
 	public ApiResponse logs(String binHash) {
 		return logs(binHash, modelName);
 	}
+	
+	public ApiResponse cves(String binHash, String modelName) {
+		Map<String, String> pathParams = new HashMap<>();
+		pathParams.put("sha_256_hash", binHash);
+		
+		Map<String, String> params = new HashMap<>();
+		params.put("model_name", modelName);
+		
+		try {
+			return send(ApiEndpoint.CVES, pathParams, params, null, null, headers);
+		} catch (IOException | InterruptedException e) {
+			return new ApiResponse(-1, e.getMessage());
+		}
+	}
+	
+	public ApiResponse cves(String binHash) {
+		return cves(binHash, modelName);
+	}
 
 	public ApiResponse nearestSymbols(double[] embeddings, String modelName, int nns, String[] collections) {
 		return null;
