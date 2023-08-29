@@ -56,3 +56,7 @@ tasks.javadoc {
     source = sourceSets.main.get().allJava
     destinationDir = buildDir.resolve("docs/javadoc")
 }
+
+tasks.jar {
+    archiveBaseName.set("reait")
+}
